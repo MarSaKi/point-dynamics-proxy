@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Point Dynamics as Proxy for Robotic World Models</title>
+<meta name="description" content="A learned 3D point simulator predicts how the scene responds to the robot; a video model renders it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Sora:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Paper look: white page, Times, the palette of the paper figures (ours orange, robot render blue, numeric action grey,
+   panels #f2f1ed / #fdede4). Light only, like the PDF. */
+:root {
+  color-scheme: light;
+  --ink: #222222; --ink-2: #4a4a4a; --muted: #777777; --line: #dcdad4;
+  --ours: #eb6834; --robot: #2a78d6; --num: #a3a29c; --bad: #d03b3b; --good: #0ca30c;
+  --panel: #f2f1ed; --panel-ours: #fdede4;
+  --serif: "Times New Roman", Tinos, "Nimbus Roman", Times, serif;
+  --col: 1180px; --wide: 1180px;
+}
+* { box-sizing: border-box; }
+html { background: #fff; }
+body { margin: 0; background: #fff; color: var(--ink); font-family: var(--serif); font-size: 20px; line-height: 1.55; }
+.pad { padding-inline: 16px; }
+.col { max-width: var(--col); margin-inline: auto; width: 100%; }
+.wide { max-width: var(--wide); margin-inline: auto; width: 100%; }
+section > *, .group > *, .pair > *, figure > * { min-width: 0; }
+h1, h2, h3 { margin: 0; font-weight: 700; line-height: 1.2; }
+p { margin: 0; }
+a { color: var(--robot); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.ours { color: var(--ours); font-weight: 700; }
+.bad { color: var(--bad); }
+.good { color: var(--good); }
+
+/* hero: the dark band with a drifting point field, kept from the first version of the page */
+.hero { position: relative; background: #0b0d10; color: #f3f5f8; overflow: hidden; }
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero .inner { position: relative; padding-block: 96px 80px; display: grid; gap: 22px; justify-items: start; max-width: calc(var(--wide) + 32px); margin-inline: auto; }
+.hero h1 { font-family: "Sora", "Segoe UI", system-ui, sans-serif; font-size: clamp(28px, 3.3vw, 43px); line-height: 1.12; font-weight: 700; letter-spacing: -0.015em; text-wrap: balance; }
+@media (min-width: 1000px) { .hero h1 { white-space: nowrap; } }
+.hero h1 span { color: #ff8a52; }
+.hero .thesis { font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif; font-size: clamp(18px, 1.8vw, 21px); line-height: 1.55; color: #a9b1bd; }
+/* byline and paper/code buttons, in the usual project-page order: title, authors, affiliations, links */
+.hero .byline { display: grid; gap: 6px; margin-top: -6px; font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif; }
+.hero .authors { font-size: clamp(17px, 1.68vw, 22px); line-height: 1.6; color: #c4cad3; }
+.hero .au { white-space: nowrap; }
+.hero .authors a { color: #f3f5f8; font-weight: 600; text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.22); transition: color .15s, border-color .15s; }
+.hero .authors a:hover, .hero .authors a:focus-visible { color: #ffb48f; border-bottom-color: #ff8a52; }
+.hero sup { font-size: 0.66em; line-height: 0; color: #ff8a52; margin-left: 1px; font-weight: 600; }
+.hero .affils { display: flex; flex-wrap: wrap; gap: 2px 26px; font-size: clamp(15.5px, 1.42vw, 18.5px); color: #a9b1bd; }
+.hero .links { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 2px; }
+.hero .btn { display: inline-flex; align-items: center; gap: 9px; padding: 10px 20px 10px 16px; border-radius: 999px; background: #f3f5f8; color: #0b0d10; font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif; font-size: 17px; font-weight: 600; line-height: 1; cursor: default; user-select: none; }
+.hero .btn svg { width: 18px; height: 18px; flex: none; }
+.hero .btn .soon { font-weight: 400; font-size: 14.5px; color: #6b7380; }
+
+section { padding-top: 64px; display: grid; gap: 22px; scroll-margin-top: 12px; }
+.sec-head { display: grid; gap: 4px; border-top: 1px solid var(--line); padding-top: 22px; }
+.sec-head .k { font-size: 16px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ours); font-weight: 700; }
+.sec-head h2 { font-size: clamp(26px, 3vw, 33px); }
+.prose { display: grid; gap: 14px; color: var(--ink-2); text-wrap: pretty; }
+.prose b { color: var(--ink); }
+
+/* video figures */
+figure { margin: 0; display: grid; gap: 8px; }
+figcaption { font-size: 17.5px; line-height: 1.45; color: var(--ink-2); }
+figcaption b { color: var(--ink); }
+.scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.strip { min-width: 780px; display: grid; gap: 10px; }
+.strip > figure { gap: 6px; }
+.labels { display: grid; align-items: end; font-size: 16px; line-height: 1.2; text-align: center; color: var(--ink); }
+.labels span { padding-inline: 2px; }
+.labels .l-ours { color: var(--ours); font-weight: 700; }
+.labels.six { grid-template-columns: repeat(6, 1fr); column-gap: 0.396%; }
+.labels.two { grid-template-columns: repeat(2, 1fr); column-gap: 1.024%; }
+.labels.three { grid-template-columns: repeat(3, 1fr); column-gap: 0.795%; }
+video, .still { display: block; width: 100%; height: auto; background: #fff; }
+.note { font-size: 16px; color: var(--muted); }
+.group { display: grid; gap: 18px; }
+.group h3 { font-size: 22px; display: flex; align-items: baseline; gap: 12px; }
+.group h3::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px; }
+@media (max-width: 860px) { .pair { grid-template-columns: 1fr; } }
+.x { color: var(--bad); font-family: "DejaVu Sans", "Segoe UI Symbol", sans-serif; font-weight: 700; }
+
+/* idea */
+.idea { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 34px; align-items: center; }
+@media (max-width: 860px) { .idea { grid-template-columns: 1fr; } }
+/* choice of proxy: three cards, as in the first version of the page */
+.choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.choice { background: var(--panel); border-radius: 10px; padding: 14px 16px; display: grid; gap: 4px; align-content: start; font-size: 17.5px; line-height: 1.45; color: var(--ink-2); }
+.choice.yes { background: var(--panel-ours); }
+.choice .v { color: var(--ink); font-size: 18.5px; font-weight: 700; }
+.choice.yes .v { color: var(--ours); }
+.ok { color: var(--good); font-family: "DejaVu Sans", "Segoe UI Symbol", sans-serif; font-weight: 700; }
+@media (max-width: 1179px) { .choices { grid-template-columns: 1fr; } }
+
+/* method */
+.method-fig { min-width: 860px; }
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; counter-reset: s; }
+.steps div { background: var(--panel); border-radius: 10px; padding: 14px 16px; font-size: 17.5px; line-height: 1.45; color: var(--ink-2); }
+.steps div.p { background: var(--panel-ours); }
+.steps b { display: block; color: var(--ink); font-size: 18.5px; margin-bottom: 2px; }
+.steps div.p b { color: var(--ours); }
+@media (max-width: 900px) { .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.facts div { border-left: 2px solid var(--ours); padding-left: 12px; font-size: 17.5px; line-height: 1.45; color: var(--ink-2); }
+.facts b { display: block; color: var(--ink); }
+@media (max-width: 760px) { .facts { grid-template-columns: 1fr; } }
+
+/* experiments */
+.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; align-items: start; }
+.trio img { width: 100%; height: auto; display: block; }
+.trio figcaption { font-size: 17.5px; }
+@media (max-width: 900px) { .trio { grid-template-columns: 1fr; max-width: 560px; } }
+.setup { display: grid; grid-template-columns: 130px minmax(0, 1fr); gap: 8px 20px; margin-block: 0; font-size: 18px; line-height: 1.45; }
+.setup dt { font-weight: 700; color: var(--ink); }
+.setup dd { margin: 0; color: var(--ink-2); }
+@media (max-width: 560px) { .setup { grid-template-columns: 1fr; gap: 0; } .setup dd { margin-bottom: 10px; } }
+.exp { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 34px; align-items: center; padding-block: 18px; border-bottom: 1px solid #efeee9; }
+.exp:last-child { border-bottom: 0; }
+.exp .t { display: grid; gap: 10px; }
+.exp .t .n { font-size: 15px; color: var(--muted); letter-spacing: 0.04em; }
+.exp h3 { font-size: 23px; }
+.exp p { color: var(--ink-2); font-size: 18.5px; line-height: 1.5; }
+.exp p b { color: var(--ink); }
+.exp img { width: 100%; height: auto; display: block; }
+.exp .charts { display: grid; gap: 14px; }
+@media (max-width: 860px) { .exp { grid-template-columns: 1fr; gap: 14px; } }
+.big { font-size: 30px; font-weight: 700; color: var(--ours); line-height: 1.2; display: flex; flex-wrap: wrap; gap: 4px 26px; }
+.big .nw { white-space: nowrap; }
+.big small { color: var(--muted); font-weight: 400; font-size: 20px; }
+
+.conclusion p { font-size: 20px; }
+.refs { margin-block: 0; padding-left: 24px; font-size: 16px; line-height: 1.5; color: var(--muted); display: grid; gap: 3px; }
+.refs a { color: var(--ink-2); }
+footer { padding-block: 56px 40px; text-align: center; font-size: 15px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <canvas id="field" aria-hidden="true"></canvas>
+  <div class="inner pad">
+    <h1>Point Dynamics as Proxy for <span>Robotic World Models</span></h1>
+    <div class="byline">
+      <p class="authors">
+        <span class="au"><a href="https://marsaki.github.io/" target="_blank" rel="noopener">Dong An</a><sup>1</sup>,</span>
+        <span class="au"><a href="https://www.linkedin.com/in/tianyu-liu-66864b38b/" target="_blank" rel="noopener">Tianyu Liu</a><sup>1,2</sup>,</span>
+        <span class="au"><a href="https://scholar.google.com/citations?user=HwSJ0WcAAAAJ" target="_blank" rel="noopener">Haoran Ding</a><sup>1,2</sup>,</span>
+        <span class="au"><a href="https://scholar.google.com/citations?user=zy7neMgAAAAJ" target="_blank" rel="noopener">Wen Yang</a><sup>1,2</sup>,</span>
+        <span class="au"><a href="https://mbzuai.ac.ae/study/faculty/anqing-duan/" target="_blank" rel="noopener">Anqing Duan</a><sup>2</sup>,</span>
+        <span class="au"><a href="https://hunterhector.github.io/" target="_blank" rel="noopener">Zhengzhong Liu</a><sup>1</sup>,</span>
+        <span class="au"><a href="https://mbzuai.ac.ae/academics/faculty-directory/eric-xing" target="_blank" rel="noopener">Eric P. Xing</a><sup>1</sup>,</span>
+        <span class="au"><a href="https://guangyiliu.com/" target="_blank" rel="noopener">Guangyi Liu</a><sup>1</sup></span>
+      </p>
+      <p class="affils"><span><sup>1</sup>Institute of Foundation Models</span><span><sup>2</sup>Mohamed bin Zayed University of Artificial Intelligence</span></p>
+    </div>
+    <div class="links">
+      <span class="btn" role="link" aria-disabled="true" title="Coming soon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>Paper <span class="soon">(coming soon)</span></span>
+      <span class="btn" role="link" aria-disabled="true" title="Coming soon"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>Code <span class="soon">(coming soon)</span></span>
+    </div>
+    <p class="thesis">Robot world models follow the arm but not the objects it touches. We let a learned 3D point simulator predict how the scene responds, and let the video model render it.</p>
+  </div>
+</header>
+
+<main class="pad">
+
+<!-- ============================================================ problem -->
+<section id="problem">
+  <div class="col sec-head"><div class="k">Problem</div><h2>The robot follows the actions; the objects do not</h2></div>
+  <div class="col prose">
+    <p>Given the current frame and a sequence of robot actions, a robotic world model predicts the future video. Rendering the robot into the input makes the arm follow the actions, but the objects in contact still go wrong: they <b>collapse</b>, or <b>respond inconsistently</b> with the action.</p>
+  </div>
+  <div class="wide pair">
+    <figure>
+      <div class="scroll"><div class="strip" style="min-width:0">
+        <div class="labels two"><span>robot render</span><span>real future</span></div>
+        <video src="media/prob_drag_bread.mp4?v=2" poster="media/prob_drag_bread.jpg?v=2" muted loop playsinline autoplay aria-label="Dragging bread on a spatula: robot-render model next to the real video"></video>
+      </div></div>
+      <figcaption><span class="x">&#10007;</span> <b>Drag bread.</b> The spatula moves away, but the bread stays on the plate.</figcaption>
+    </figure>
+    <figure>
+      <div class="scroll"><div class="strip" style="min-width:0">
+        <div class="labels two"><span>robot render</span><span>real future</span></div>
+        <video src="media/prob_release_cup.mp4?v=2" poster="media/prob_release_cup.jpg?v=2" muted loop playsinline autoplay aria-label="Releasing a cup: robot-render model next to the real video"></video>
+      </div></div>
+      <figcaption><span class="x">&#10007;</span> <b>Release cup.</b> The gripper opens, but the released cup rises with it.</figcaption>
+    </figure>
+  </div>
+  <p class="col note">DROID test clips, Wan2.2. Videos play at half speed.</p>
+</section>
+
+<!-- ============================================================ insight -->
+<section id="insight">
+  <div class="col sec-head"><div class="k">Insight</div><h2>Separate dynamics from rendering</h2></div>
+  <div class="wide idea">
+    <img class="still" src="media/fig1a.png?v=2" alt="Action-only conditioning: the video model must jointly infer interaction dynamics and render appearance. Ours: robot render plus point dynamics, so the video model mainly renders the simulated point dynamics.">
+    <div class="prose">
+      <p>An action, numeric or rendered, specifies where the robot goes but not how the scene responds. A single video model must then <b>infer the interaction dynamics</b> while also <b>rendering appearance</b>.</p>
+      <p>Following code world models <a href="#ref-1">[1</a>, <a href="#ref-2">2</a>, <a href="#ref-3">3]</a>, we split the two jobs. A simulator evolves the world state and draws it into a coarse <b>proxy</b> video; the video model paints the final frames from it. For robot manipulation, the central design choice is the proxy.</p>
+    </div>
+  </div>
+  <div class="wide group">
+    <h3>What should the proxy be?</h3>
+    <div class="prose"><p>The proxy must represent any object, including deformable and articulated ones. It must be obtainable from a single real observation, and its dynamics must be predictable under robot actions.</p></div>
+    <div class="choices">
+      <div class="choice"><div class="v"><span class="x">&#10007;</span> Physics simulator</div>
+        <p>Needs mass, friction, object meshes and a solver for each material, all of which are hard to obtain in a real scene.</p></div>
+      <div class="choice"><div class="v"><span class="x">&#10007;</span> Hand-written rules</div>
+        <p>A rule written as code can move the object held between the fingers, but cannot express pushing, dragging or deformation.</p></div>
+      <div class="choice yes"><div class="v"><span class="ok">&#10003;</span> 3D point dynamics</div>
+        <p>From one RGB-D frame, points represent any object, rigid or deformable. Their dynamics are learned from real robot data.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ method -->
+<section id="method">
+  <div class="col sec-head"><div class="k">Method</div><h2>Simulate in 3D, render back to 2D</h2></div>
+  <div class="col prose"><p>The simulator decides <b>what happens</b>; the video model decides <b>how it looks</b>. They meet in a pixel-aligned proxy.</p></div>
+  <div class="wide scroll">
+    <video class="method-fig" src="media/method.mp4?v=2" poster="media/method.jpg?v=2" muted loop playsinline autoplay aria-label="Animated method overview: input, 3D state, simulator, proxy and renderer"></video>
+  </div>
+  <div class="wide steps">
+    <div><b>1 &middot; Lift to 3D</b>The first RGB-D frame becomes scene points; forward kinematics turns the actions into robot points.</div>
+    <div><b>2 &middot; Simulate</b>A learned point dynamics model, PointWorld <a href="#ref-4">[4]</a>, predicts how every scene point responds to the robot.</div>
+    <div class="p"><b>3 &middot; Proxy</b>The simulated points are drawn back into pixel-aligned videos: robot render, warp of the first frame, and point tracks.</div>
+    <div><b>4 &middot; Render</b>A video model reads the proxy through its own VAE and paints the real arm, lighting and contact.</div>
+  </div>
+  <div class="wide facts">
+    <div><b>Plug-in</b>Only the video model's first layer is widened, with new weights starting at zero.</div>
+    <div><b>Modular</b>Any simulator that predicts point displacements can be swapped in; we use two renderers of different architectures.</div>
+    <div><b>Cheap</b>Simulating and drawing the proxy takes 0.93&nbsp;s per clip, next to 17.2&nbsp;s for generating the video.</div>
+  </div>
+</section>
+
+<!-- ============================================================ results -->
+<section id="results">
+  <div class="col sec-head"><div class="k">Results</div><h2>Same first frame, same actions, different conditions</h2></div>
+  <div class="col prose"><p>The left column shows the simulated point trajectories (purple to yellow over time). Without point dynamics, the arm moves correctly but the object does not; with the <span class="ours">point dynamics proxy</span>, the object responds as in the real video. Videos play at half speed.</p></div>
+
+  <div class="wide group">
+    <h3>DROID</h3>
+    <div class="scroll"><div class="strip">
+      <div class="labels six"><span>simulated point dynamics</span><span>numeric action</span><span>robot render</span><span>robot render + depth</span><span class="l-ours">point dynamics proxy (ours)</span><span>real future</span></div>
+        <figure><video src="media/droid_drag_bread.mp4?v=2" poster="media/droid_drag_bread.jpg?v=2" muted loop playsinline autoplay aria-label="Drag bread: six-way comparison"></video>
+          <figcaption><b>Drag bread.</b> With the numeric action or the robot render, the bread stays on the plate as the spatula moves away.</figcaption></figure>
+        <figure><video src="media/droid_release_cup.mp4?v=2" poster="media/droid_release_cup.jpg?v=2" muted loop playsinline autoplay aria-label="Release cup: six-way comparison"></video>
+          <figcaption><b>Release cup.</b> Without point dynamics, the released cup rises with the open gripper.</figcaption></figure>
+        <figure><video src="media/droid_lift_towel.mp4?v=2" poster="media/droid_lift_towel.jpg?v=2" muted loop playsinline autoplay aria-label="Lift a towel: six-way comparison"></video>
+          <figcaption><b>Lift a towel.</b> Without point dynamics, the towel bunches up.</figcaption></figure>
+    </div></div>
+  </div>
+
+  <div class="wide group">
+    <h3>Real robot</h3>
+    <p class="note" style="margin-top:-8px">Two WidowX AI arms, one overhead RGB-D camera, 15 tasks; Wan2.2 and PointWorld fine-tuned on our recordings.</p>
+    <div class="scroll"><div class="strip">
+      <div class="labels six"><span>simulated point dynamics</span><span>numeric action</span><span>robot render</span><span>robot render + depth</span><span class="l-ours">point dynamics proxy (ours)</span><span>real future</span></div>
+        <figure><video src="media/real_unfold_bag.mp4?v=2" poster="media/real_unfold_bag.jpg?v=2" muted loop playsinline autoplay aria-label="Unfold a bag: six-way comparison"></video>
+          <figcaption><b>Unfold a bag.</b> Without point dynamics, the bag is not unfolded.</figcaption></figure>
+        <figure><video src="media/real_handover_bag.mp4?v=2" poster="media/real_handover_bag.jpg?v=2" muted loop playsinline autoplay aria-label="Hand over a bag: six-way comparison"></video>
+          <figcaption><b>Hand over a bag.</b> Without point dynamics, the bag hangs from the wrong arm or appears twice.</figcaption></figure>
+        <figure><video src="media/real_handover_pillow.mp4?v=2" poster="media/real_handover_pillow.jpg?v=2" muted loop playsinline autoplay aria-label="Hand over a pillow: six-way comparison"></video>
+          <figcaption><b>Hand over a pillow.</b> With the proxy, the pillow&rsquo;s shape and position stay closest to the real handover.</figcaption></figure>
+    </div></div>
+  </div>
+
+  <div class="col group">
+    <h3>Editing the simulation steers the video</h3>
+    <figure>
+      <div class="scroll"><div class="strip" style="min-width:520px">
+        <div class="labels three"><span>unedited</span><span>cloth motion frozen</span><span>cloth motion doubled</span></div>
+        <video src="media/edit.mp4?v=2" poster="media/edit.jpg?v=2" muted loop playsinline autoplay aria-label="Edited simulated cloth motion (top) and the generated videos (bottom)"></video>
+      </div></div>
+      <figcaption>Top: the simulated motion of the cloth, edited at test time. Bottom: the video generated from it, with the robot and the rest of the scene unchanged (a successful example; DROID, Wan2.2).</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================ experiments -->
+<section id="experiments">
+  <div class="col sec-head"><div class="k">Experiments</div><h2>What the numbers say</h2></div>
+  <dl class="col setup">
+    <dt>Data</dt><dd>DROID: 326K training clips; 1,515 test clips from 900 held-out episodes in 13 labs. No wrist camera, no text.</dd>
+    <dt>Renderers</dt><dd>Wan2.2 (DiT) and Ctrl-World (SVD UNet), each trained with four conditions on the same data and budget.</dd>
+    <dt>Metric</dt><dd><b>Object motion error</b>: object points are tracked in the generated and the real video; the pixel distance between the tracks. Lower is better.</dd>
+  </dl>
+
+  <div class="wide trio">
+    <figure>
+      <img src="media/main.svg?v=3" alt="Object motion error on the DROID test set: point dynamics proxy 4.69 (Wan2.2) and 4.97 (Ctrl-World) pixels, against 5.13 and 5.30 for the robot render.">
+      <figcaption><b>Point dynamics make interaction more faithful.</b> Against the robot render, the proxy lowers object motion error by 8.6% on Wan2.2 and 6.2% on Ctrl-World, without degrading image quality.</figcaption>
+    </figure>
+    <figure>
+      <img src="media/gain.svg?v=2" alt="Change of object motion error against the robot render: about -2% on clips without labeled motion, -12.3% (Wan2.2) and -8.2% (Ctrl-World) on clips with a non-rigid response.">
+      <figcaption><b>The gain comes from non-rigid responses.</b> Where objects are pushed, dragged or deformed, the error drops by 12.3% and 8.2%; clips without labeled motion change little.</figcaption>
+    </figure>
+    <figure>
+      <img src="media/ladder.svg?v=2" alt="Object motion error when the simulator is swapped at test time: static points and a hand-written rule are worse than the robot render alone; PointWorld-small, PointWorld-large and label point flow are better.">
+      <figcaption><b>The video follows the simulator.</b> Swapped at test time with the video model fixed, better point dynamics give a better video, from static points and a hand-written rule to learned simulators.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================================================ conclusion -->
+<section id="conclusion" class="conclusion">
+  <div class="col sec-head"><div class="k">Conclusion</div><h2>Better point dynamics, more faithful world models</h2></div>
+  <div class="col prose">
+    <p>We decouple a robotic world model into a simulator that predicts how 3D scene points respond to the robot and a renderer that turns the prediction into video, connected by a pixel-aligned point dynamics proxy. Explicit point dynamics make object interaction more faithful, and the video follows the simulator. Progress in 3D point dynamics, learned or written as code, can thus carry over to robotic world models without changing how they render.</p>
+  </div>
+  <ol class="col refs">
+    <li id="ref-1">Y. Chen, G. Lin, C. Zhang. <a href="https://arxiv.org/abs/2608.25927">Code World Model: Coding Agent as World Brain</a>. arXiv:2608.25927, 2026.</li>
+    <li id="ref-2">Z. Fang, Y. Shao, K. Zhu, et al. <a href="https://arxiv.org/abs/2609.26458">Code Plans, Diffusion Renders: Open-Ended Generative World Modeling</a>. arXiv:2609.26458, 2026.</li>
+    <li id="ref-3">Z.-H. Huang, G. Lin, J. Lin, et al. <a href="https://arxiv.org/abs/2609.10540">Programmable World Model</a>. arXiv:2609.10540, 2026.</li>
+    <li id="ref-4">W. Huang, Y.-W. Chao, A. Mousavian, et al. <a href="https://arxiv.org/abs/2601.03782">PointWorld: Scaling 3D World Models for In-The-Wild Robotic Manipulation</a>. CVPR 2026.</li>
+  </ol>
+</section>
+
+</main>
+
+<footer class="pad">Point Dynamics as Proxy for Robotic World Models</footer>
+
+<script>
+(function () {
+  var reduce0 = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var cv = document.getElementById("field");
+  var ctx = cv && cv.getContext && cv.getContext("2d");
+  var W = 0, H = 0, dpr = 1, pts = [];
+  function layout() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    pts = [];
+    var s = W < 600 ? 20 : 26;
+    for (var y = s / 2; y < H; y += s) for (var x = s / 2; x < W; x += s) {
+      var dx = (x - W * 0.5) / (W * 0.5), dy = (y - H * 0.55) / (H * 0.6);
+      pts.push({ x: x, y: y, hot: dx * dx + dy * dy < 0.18 && Math.random() < 0.55 });
+    }
+  }
+  function draw(t) {
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i];
+      var ox = 7 * Math.sin(p.y * 0.018 + t * 0.55) + 4 * Math.sin(p.x * 0.011 - t * 0.3);
+      var oy = 5 * Math.cos(p.x * 0.016 + t * 0.45);
+      ctx.fillStyle = p.hot ? "rgba(240,116,60,0.55)" : "rgba(220,228,240,0.13)";
+      ctx.beginPath(); ctx.arc(p.x + ox, p.y + oy, p.hot ? 1.8 : 1.3, 0, 6.2832); ctx.fill();
+    }
+  }
+  if (ctx) {
+    layout(); draw(0);
+    if ("ResizeObserver" in window) new ResizeObserver(function () { layout(); draw(0); }).observe(cv);
+    if (!reduce0) {
+      var t0 = performance.now();
+      (function loop(now) { draw((now - t0) / 1000); requestAnimationFrame(loop); })(t0);
+    }
+  }
+})();
+(function () {
+  var vids = Array.prototype.slice.call(document.querySelectorAll("video"));
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce) {
+    vids.forEach(function (v) { v.removeAttribute("autoplay"); v.pause(); v.controls = true; });
+    return;
+  }
+  // Play only the videos on screen.
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        var v = e.target;
+        if (e.isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } else { v.pause(); }
+      });
+    }, { rootMargin: "200px" });
+    vids.forEach(function (v) { io.observe(v); });
+  }
+})();
+</script>
+</body>
+</html>
