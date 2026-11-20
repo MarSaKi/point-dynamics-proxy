@@ -138,6 +138,13 @@ video, .still { display: block; width: 100%; height: auto; background: #fff; }
 .conclusion p { font-size: 20px; }
 .refs { margin-block: 0; padding-left: 24px; font-size: 16px; line-height: 1.5; color: var(--muted); display: grid; gap: 3px; }
 .refs a { color: var(--ink-2); }
+/* citation: arXiv's own BibTeX entry for 2611.25946 (11-20; author list on two lines so it fits the column), with a copy button */
+.bib { position: relative; }
+.bib pre { margin: 0; padding: 18px 22px; background: var(--panel); border-radius: 10px; overflow-x: auto; font-family: ui-monospace, "SFMono-Regular", "DejaVu Sans Mono", Menlo, Consolas, monospace; font-size: 15px; line-height: 1.6; color: var(--ink); tab-size: 2; }
+.bib .copy { position: absolute; top: 10px; right: 10px; padding: 6px 13px; border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--ink-2); font-family: "Source Sans 3", "Segoe UI", system-ui, sans-serif; font-size: 14.5px; font-weight: 600; line-height: 1; cursor: pointer; transition: color .15s, border-color .15s; }
+.bib .copy:hover, .bib .copy:focus-visible { color: var(--ours); border-color: var(--ours); }
+.bib .copy.done { color: var(--good); border-color: var(--good); }
+@media (max-width: 760px) { .bib pre { font-size: 13px; padding: 48px 16px 16px; } }
 footer { padding-block: 56px 40px; text-align: center; font-size: 15px; color: var(--muted); }
 </style>
 </head>
@@ -322,6 +329,24 @@ footer { padding-block: 56px 40px; text-align: center; font-size: 15px; color: v
   </ol>
 </section>
 
+<!-- ============================================================ citation -->
+<section id="citation">
+  <div class="col sec-head"><div class="k">Citation</div><h2>BibTeX</h2></div>
+  <div class="col bib">
+    <pre><code id="bibtex">@misc{an2026pointdynamicsproxyrobotic,
+  title         = {Point Dynamics as Proxy for Robotic World Models},
+  author        = {Dong An and Tianyu Liu and Haoran Ding and Wen Yang and Anqing Duan and
+                   Zhengzhong Liu and Eric P. Xing and Guangyi Liu},
+  year          = {2026},
+  eprint        = {2611.25946},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV},
+  url           = {https://arxiv.org/abs/2611.25946}
+}</code></pre>
+    <button type="button" class="copy" data-target="bibtex">Copy</button>
+  </div>
+</section>
+
 </main>
 
 <footer class="pad">Point Dynamics as Proxy for Robotic World Models</footer>
@@ -380,6 +405,22 @@ footer { padding-block: 56px 40px; text-align: center; font-size: 15px; color: v
     }, { rootMargin: "200px" });
     vids.forEach(function (v) { io.observe(v); });
   }
+})();
+(function () {
+  // Copy the BibTeX entry; falls back to selecting the text where the clipboard API is not available.
+  document.querySelectorAll(".bib .copy").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var el = document.getElementById(btn.getAttribute("data-target"));
+      var text = el.textContent;
+      function ok() { btn.textContent = "Copied"; btn.classList.add("done"); setTimeout(function () { btn.textContent = "Copy"; btn.classList.remove("done"); }, 1600); }
+      function fallback() {
+        var r = document.createRange(); r.selectNodeContents(el);
+        var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+        try { if (document.execCommand("copy")) ok(); } catch (e) {}
+      }
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(ok, fallback); else fallback();
+    });
+  });
 })();
 </script>
 </body>

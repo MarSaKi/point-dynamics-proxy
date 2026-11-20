@@ -9,3 +9,18 @@ Dong An<sup>1</sup>, Tianyu Liu<sup>1,2</sup>, Haoran Ding<sup>1,2</sup>, Wen Ya
 **Paper:** [arXiv:2611.25946](https://arxiv.org/abs/2611.25946)
 
 Code: coming soon.
+
+## Citation
+
+```bibtex
+@misc{an2026pointdynamicsproxyrobotic,
+  title         = {Point Dynamics as Proxy for Robotic World Models},
+  author        = {Dong An and Tianyu Liu and Haoran Ding and Wen Yang and Anqing Duan and
+                   Zhengzhong Liu and Eric P. Xing and Guangyi Liu},
+  year          = {2026},
+  eprint        = {2611.25946},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CV},
+  url           = {https://arxiv.org/abs/2611.25946}
+}
+```
