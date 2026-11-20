@@ -6,4 +6,6 @@ Dong An<sup>1</sup>, Tianyu Liu<sup>1,2</sup>, Haoran Ding<sup>1,2</sup>, Wen Ya
 
 **Project page:** https://marsaki.github.io/point-dynamics-proxy/
 
-Paper and code: coming soon.
+**Paper:** [arXiv:2611.25946](https://arxiv.org/abs/2611.25946)
+
+Code: coming soon.
