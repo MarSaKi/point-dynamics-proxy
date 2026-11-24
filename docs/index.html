@@ -46,9 +46,9 @@ body::after { content: ""; position: fixed; inset: 0; z-index: 90; pointer-event
 img, video, canvas, svg { display: block; max-width: 100%; }
 a { color: inherit; }
 p { margin: 0; }
-h1, h2, h3 { margin: 0; font-family: var(--display); line-height: 1.02; letter-spacing: -.03em; text-wrap: balance; color: var(--fg); }
-h2 { font-size: clamp(38px, 5vw, var(--f-4)); font-weight: 760; font-stretch: 106%;
-  background: linear-gradient(180deg, #ffffff 18%, #c2c7cf 100%); background-size: 100% 1.02em; -webkit-background-clip: text; background-clip: text; color: transparent; }
+h1, h2, h3 { margin: 0; font-family: var(--display); line-height: 1.08; letter-spacing: -.025em; text-wrap: balance; color: var(--fg); }
+h2 { font-size: clamp(28px, 3.1vw, var(--f-3)); font-weight: 740; font-stretch: 104%; text-wrap: wrap;
+  background: linear-gradient(180deg, #ffffff 18%, #c2c7cf 100%); background-size: 100% 1.08em; -webkit-background-clip: text; background-clip: text; color: transparent; }
 h3 { font-size: clamp(21.5px, 2vw, var(--f-2)); font-weight: 700; font-stretch: 102%; letter-spacing: -.02em; line-height: 1.15; }
 sup { font-size: .62em; line-height: 0; }
 button { font: inherit; color: inherit; cursor: pointer; }
@@ -60,11 +60,11 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @media (min-width: 640px) { .wrap { padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); } }
 .flow { display: grid; gap: var(--s5); }
 .flow > * { min-width: 0; }
-.measure { max-width: calc((100% - var(--gap)) * .618); }
+.measure { max-width: none; }   /* v4: text spans the full content width, like the videos */
 .gold { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.618fr); gap: var(--s5) var(--gap); }
 .gold.mirror { grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr); }
 .gold > * { min-width: 0; }
-@media (max-width: 960px) { .measure { max-width: none; } .gold, .gold.mirror { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 960px) { .gold, .gold.mirror { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------------------------------------------------------- the bands */
 .sec { position: relative; padding-block: clamp(var(--s6), 10vw, var(--s7)); isolation: isolate; }
@@ -83,10 +83,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* ------------------------------------------------------------- headers */
 .head { display: grid; justify-items: start; }
 .head .eyebrow { margin-bottom: var(--s3); }
-.head .sub, .head .prose { margin-top: var(--s4); }
+.head .sub, .head .prose { margin-top: var(--s3); }
 .eyebrow { display: flex; align-items: center; gap: var(--s2); margin: 0; font: 600 12px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--ours); }
 .eyebrow::before { content: ""; width: var(--s4); height: 2px; border-radius: 2px; background: var(--plasma); flex: none; }
-.sub, .prose { font-size: clamp(17px, 1.42vw, var(--f-1)); line-height: 1.618; color: var(--fg-2); text-wrap: pretty; }
+.sub, .prose { font-size: clamp(17px, 1.4vw, 20.5px); line-height: 1.618; color: var(--fg-2); text-wrap: pretty; }
 .prose { display: grid; gap: var(--s3); }
 .sub b, .prose b { color: var(--fg); font-weight: 600; }
 .prose a { text-underline-offset: 3px; text-decoration-thickness: 1px; }
@@ -153,18 +153,18 @@ button { font: inherit; color: inherit; cursor: pointer; }
   linear-gradient(180deg, rgba(7, 8, 10, .75) 0%, rgba(7, 8, 10, 0) 16%); }
 .hero-in { position: relative; z-index: 2; padding-top: calc(var(--bar) + var(--s6)); padding-bottom: 104px; display: grid; justify-items: start; }
 .hero .eyebrow { margin-bottom: var(--s4); }
-.hero h1 { font-size: clamp(52px, 8vw, var(--f-5)); font-weight: 820; font-stretch: 104%; line-height: .93; letter-spacing: -.045em; color: #fff; }
+.hero h1 { font-size: clamp(44px, 5.6vw, 80px); font-weight: 800; font-stretch: 104%; line-height: .96; letter-spacing: -.04em; color: #fff; }
 .hero h1 span { display: block; }
 .hero h1 .l2 { background: var(--hot); -webkit-background-clip: text; background-clip: text; color: transparent; padding-bottom: .06em; }
 .hero-sub { margin-top: var(--s4); max-width: 46ch; font-size: clamp(17px, 1.5vw, var(--f-1)); line-height: 1.5; color: rgba(255, 255, 255, .84); text-wrap: pretty; }
-.paper-id { margin-top: var(--s5); display: grid; gap: var(--s1); max-width: 640px; }
-.paper-title { font: 650 clamp(18px, 1.6vw, 22px)/1.3 var(--display); letter-spacing: -.01em; color: #fff; }
-.authors { display: flex; flex-wrap: wrap; gap: 3px 16px; font-size: clamp(14.5px, 1.2vw, 16px); color: rgba(255, 255, 255, .7); }
+.paper-id { margin-top: var(--s5); display: grid; gap: var(--s2); max-width: 760px; }
+.paper-title { font: 650 clamp(20px, 1.85vw, 26px)/1.3 var(--display); letter-spacing: -.01em; color: #fff; }
+.authors { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: clamp(16px, 1.4vw, 19.5px); color: rgba(255, 255, 255, .7); }
 .authors a { color: rgba(255, 255, 255, .95); text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, .22); transition: color .15s, border-color .15s; }
 .authors a:hover, .authors a:focus-visible { color: #ffb48f; border-bottom-color: var(--ours); }
 .authors span { white-space: nowrap; }
 .authors sup, .affils sup { color: var(--ours); font-weight: 600; margin-left: 1px; }
-.affils { display: flex; flex-wrap: wrap; gap: 2px 22px; font-size: var(--f-s); color: rgba(255, 255, 255, .56); }
+.affils { display: flex; flex-wrap: wrap; gap: 2px 22px; font-size: clamp(14px, 1.15vw, 16px); color: rgba(255, 255, 255, .62); }
 .links { display: flex; flex-wrap: wrap; gap: var(--s2); margin-top: var(--s4); }
 .btn { display: inline-flex; align-items: center; gap: 9px; height: 46px; padding: 0 20px 0 17px; border-radius: 999px; font: 600 15px/1 var(--sans); text-decoration: none; color: #fff; background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .24); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: background .2s, transform .2s var(--ease), box-shadow .2s; }
 .btn svg { width: 18px; height: 18px; flex: none; }
@@ -187,7 +187,7 @@ a.btn.primary:hover, a.btn.primary:focus-visible { background: #fff; box-shadow:
 }
 
 /* ------------------------------------------------------------- overview */
-.lead { font: 560 clamp(21.5px, 2vw, var(--f-2))/1.38 var(--display); letter-spacing: -.016em; color: var(--fg); text-wrap: pretty; }
+.lead { font: 560 clamp(20px, 1.75vw, 24px)/1.42 var(--display); letter-spacing: -.016em; color: var(--fg); text-wrap: pretty; }
 .lead em { font-style: normal; color: var(--ours); }
 .overview .prose { margin-top: var(--s4); }
 .stats { list-style: none; margin: 0; padding: 0; align-self: center; }
@@ -387,7 +387,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
 .refs a { color: var(--fg-2); text-underline-offset: 3px; }
 .bib-block { display: grid; gap: var(--s3); }
 .bib-h { display: flex; align-items: center; gap: var(--s2); }
-.bib pre { margin: 0; padding: var(--s4) var(--s4); border-radius: var(--r3); background: rgba(0, 0, 0, .45); border: 1px solid var(--line); color: #e6e8ec; overflow-x: auto; font: 14px/1.7 var(--mono); tab-size: 2; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04); }
+.bib pre { margin: 0; padding: var(--s4) var(--s4); border-radius: var(--r3); background: rgba(0, 0, 0, .45); border: 1px solid var(--line); color: #e6e8ec; overflow-x: auto; font: 13.5px/1.7 var(--mono); tab-size: 2; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04); }
 .bib pre .k { color: #ff9a6a; } .bib pre .f { color: var(--fg-3); }
 .copy { height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-2); background: rgba(255, 255, 255, .04); color: var(--fg-2); font-size: 13px; font-weight: 600; }
 .copy:hover { color: var(--ours); border-color: var(--ours); }
@@ -490,7 +490,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
   <div class="wrap flow">
     <header class="head">
       <p class="eyebrow">The problem</p>
-      <h2>The arm follows the actions.<br>The objects do not.</h2>
+      <h2>The arm follows the actions. The objects do not.</h2>
       <p class="sub measure">Given the current frame and a sequence of robot actions, a robotic world model predicts the future video. Rendering the robot into the input makes the arm follow the actions, but the objects in contact still go wrong: they <b>collapse</b>, or <b>respond inconsistently</b> with the action.</p>
     </header>
     <div class="fails">
@@ -560,7 +560,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
   <div class="wrap flow">
     <header class="head">
       <p class="eyebrow">Method</p>
-      <h2>Simulate in 3D.<br>Render back to 2D.</h2>
+      <h2>Simulate in 3D. Render back to 2D.</h2>
       <p class="sub measure">The simulator decides <b>what happens</b>; the video model decides <b>how it looks</b>. They meet in a pixel-aligned proxy. Scroll through the four steps on the clip of the paper&rsquo;s method figure.</p>
     </header>
     <div class="gold scrolly">
@@ -622,7 +622,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
   <div class="wrap flow">
     <header class="head">
       <p class="eyebrow">Results</p>
-      <h2>Same frame. Same actions.<br>Different conditions.</h2>
+      <h2>Same frame. Same actions. Different conditions.</h2>
       <p class="sub measure">Every model starts from the same first frame and receives the same actions; only the conditioning differs. Without point dynamics, the arm moves correctly but the object does not. With the <span class="ours-t">point dynamics proxy</span>, the object responds as in the real video.</p>
     </header>
     <div class="ex-block">
@@ -718,7 +718,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
   <div class="wrap flow">
     <header class="head">
       <p class="eyebrow">Conclusion</p>
-      <h2>Better point dynamics,<br>more faithful world models.</h2>
+      <h2>Better point dynamics, more faithful world models.</h2>
       <p class="sub measure">We decouple a robotic world model into a simulator that predicts how 3D scene points respond to the robot and a renderer that turns the prediction into video, connected by a pixel-aligned point dynamics proxy. Explicit point dynamics make object interaction more faithful, and the video follows the simulator. Progress in 3D point dynamics, learned or written as code, can thus carry over to robotic world models without changing how they render.</p>
     </header>
     <ol class="refs measure">
@@ -732,8 +732,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
       <div class="bib">
 <pre><code id="bibtex">@misc{an2026pointdynamicsproxyrobotic,
   title         = {Point Dynamics as Proxy for Robotic World Models},
-  author        = {Dong An and Tianyu Liu and Haoran Ding and Wen Yang and Anqing Duan and
-                   Zhengzhong Liu and Eric P. Xing and Guangyi Liu},
+  author        = {Dong An and Tianyu Liu and Haoran Ding and Wen Yang and Anqing Duan and Zhengzhong Liu and Eric P. Xing and Guangyi Liu},
   year          = {2026},
   eprint        = {2611.25946},
   archivePrefix = {arXiv},
@@ -794,16 +793,17 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
   function dimmed(img) {             // desaturated (0.25) and darkened (0.62) input frame, as in the paper's point-dynamics panels
     let c = dims.get(img.src);
     if (c) return c;
-    c = document.createElement('canvas'); c.width = W0; c.height = H0;
-    const x = c.getContext('2d'); x.drawImage(img, 0, 0, W0, H0);
+    const cw = img.naturalWidth || W0, ch = img.naturalHeight || H0;   // 2x stills since v4
+    c = document.createElement('canvas'); c.width = cw; c.height = ch;
+    const x = c.getContext('2d'); x.drawImage(img, 0, 0, cw, ch);
     try {
-      const d = x.getImageData(0, 0, W0, H0), p = d.data;
+      const d = x.getImageData(0, 0, cw, ch), p = d.data;
       for (let i = 0; i < p.length; i += 4) {
         const l = .299 * p[i] + .587 * p[i + 1] + .114 * p[i + 2];
         p[i] = (l + (p[i] - l) * .25) * .62; p[i + 1] = (l + (p[i + 1] - l) * .25) * .62; p[i + 2] = (l + (p[i + 2] - l) * .25) * .62;
       }
       x.putImageData(d, 0, 0);
-    } catch (e) { x.fillStyle = 'rgba(8,9,11,.45)'; x.fillRect(0, 0, W0, H0); }
+    } catch (e) { x.fillStyle = 'rgba(8,9,11,.45)'; x.fillRect(0, 0, cw, ch); }
     dims.set(img.src, c);
     return c;
   }
@@ -852,11 +852,15 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
     return Math.min(.8, Math.max(.2, xs[xs.length >> 1] / W0));
   }
 
-  /* one panel of a clip: a tile of the grid video, or the point-dynamics layer, cropped to crop and drawn into dst */
+  /* one panel of a clip: a tile of the grid video, or the point-dynamics layer, cropped to crop and drawn into dst.
+     crop is in 640x352 px; videos and stills may be stored larger (v4: 2x grids), so source rects are scaled by the
+     media's real size. src.zt = {w, h, box} marks src.video as a zoom grid: tiles of w x h px holding just that box. */
+  const sameBox = (a, b) => a[0] === b[0] && a[1] === b[1] && a[2] === b[2] && a[3] === b[3];
   function drawPanel(ctx, src, kind, crop, dst, t) {
     const [x0, y0, x1, y1] = crop, [X, Y, W, H] = dst;
     if (kind === 'points') {
-      if (src.base) ctx.drawImage(src.base, x0, y0, x1 - x0, y1 - y0, X, Y, W, H);
+      const bs = src.base ? (src.base.width || src.base.naturalWidth) / W0 : 1;
+      if (src.base) ctx.drawImage(src.base, x0 * bs, y0 * bs, (x1 - x0) * bs, (y1 - y0) * bs, X, Y, W, H);
       else { ctx.fillStyle = '#111'; ctx.fillRect(X, Y, W, H); }
       if (src.clip) {
         const s = W / (x1 - x0), lw = Math.max(1.1, Math.min(2.4, s * 1.05)), r = Math.max(1.8, Math.min(4.2, s * 1.9));
@@ -867,8 +871,10 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
       return;
     }
     const k = typeof kind === 'number' ? kind : TILE[kind], tx = (k % 3) * W0, ty = Math.floor(k / 3) * H0;
-    if (src.video && ready(src.video)) ctx.drawImage(src.video, tx + x0, ty + y0, x1 - x0, y1 - y0, X, Y, W, H);
-    else if (src.still) ctx.drawImage(src.still, x0, y0, x1 - x0, y1 - y0, X, Y, W, H);
+    const z = src.zt, v = src.video;
+    if (v && ready(v) && z && sameBox(crop, z.box)) ctx.drawImage(v, (k % 3) * z.w, Math.floor(k / 3) * z.h, z.w, z.h, X, Y, W, H);
+    else if (v && ready(v) && !z) { const s = v.videoWidth / (3 * W0); ctx.drawImage(v, (tx + x0) * s, (ty + y0) * s, (x1 - x0) * s, (y1 - y0) * s, X, Y, W, H); }
+    else if (src.still) { const s = src.still.naturalWidth / W0; ctx.drawImage(src.still, x0 * s, y0 * s, (x1 - x0) * s, (y1 - y0) * s, X, Y, W, H); }
     else { ctx.fillStyle = '#000'; ctx.fillRect(X, Y, W, H); }
   }
 
@@ -959,11 +965,12 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
     }
     tile(k, x, y, bx, u) {
       const { ctx, tw, th } = this, sx = (k % 3) * W0, sy = Math.floor(k / 3) * H0;
+      const bs = this.base.naturalWidth ? this.base.naturalWidth / (3 * W0) : 1, vs = this.v.videoWidth ? this.v.videoWidth / (3 * W0) : 1;
       const split = Math.max(x, Math.min(x + tw, bx));
       const baseOk = this.base.complete && this.base.naturalWidth;
       if (split > x) {
         const fw = (split - x) / tw;
-        if (baseOk) ctx.drawImage(this.base, sx, sy, W0 * fw, H0, x, y, split - x, th);
+        if (baseOk) ctx.drawImage(this.base, sx * bs, sy * bs, W0 * fw * bs, H0 * bs, x, y, split - x, th);
         const clip = this.clips && this.clips[k];
         if (clip) {
           ctx.save(); ctx.beginPath(); ctx.rect(x, y, split - x, th); ctx.clip();
@@ -973,8 +980,8 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
         }
       }
       if (split < x + tw) {
-        const f0 = (split - x) / tw, src = ready(this.v) ? this.v : (baseOk ? this.base : null);
-        if (src) ctx.drawImage(src, sx + W0 * f0, sy, W0 * (1 - f0), H0, split, y, x + tw - split, th);
+        const f0 = (split - x) / tw, src = ready(this.v) ? this.v : (baseOk ? this.base : null), s = src === this.v ? vs : bs;
+        if (src) ctx.drawImage(src, (sx + W0 * f0) * s, sy * s, W0 * (1 - f0) * s, H0 * s, split, y, x + tw - split, th);
       }
       ctx.strokeStyle = 'rgba(255,255,255,.07)'; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, tw - 1, th - 1);
     }
@@ -1061,7 +1068,8 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
       this.fig = fig; this.clip = clip; this.cv = $('canvas', fig); this.ctx = this.cv.getContext('2d');
       this.bad = fig.dataset.bad.split(',').map(Number); this.good = fig.dataset.good.split(',').map(Number);
       const [x0, y0, x1, y1] = clip.box; this.cv.style.aspectRatio = `${2 * (x1 - x0) + 12} / ${y1 - y0}`;
-      this.v = mkVideo(fig); this.v.src = `media/clips/${clip.id}.mp4`;
+      this.v = mkVideo(fig); this.v.src = `media/clips/${clip.id}_zoom.mp4`;
+      this.zt = { ...clip.zoom, box: clip.box };
       image(`media/clips/${clip.id}.jpg`, img => { this.still = img; this.dirty = true; });
       new ResizeObserver(() => { this.size = sizeCanvas(this.cv); this.dirty = true; }).observe(this.cv);
       watch(fig, this);
@@ -1076,7 +1084,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
       const { ctx } = this, W = this.cv.width, H = this.cv.height, box = this.clip.box, bw = box[2] - box[0];
       const gap = W * 12 / (2 * bw + 12), pw = (W - gap) / 2, sc = pw / bw;
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
-      const src = { video: this.v, still: this.still };
+      const src = { video: this.v, still: this.still, zt: this.zt };
       drawPanel(ctx, src, 'robot', box, [0, 0, pw, H], t);
       drawPanel(ctx, src, 'real', box, [pw + gap, 0, pw, H], t);
       if (Math.floor(t * 7.5) >= 12) {
@@ -1106,7 +1114,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
       this.v = mkVideo(this.grid);
       this.v.addEventListener('loadeddata', () => { this.dirty = true; });
       new ResizeObserver(() => { this.dirty = true; this.sized = false; }).observe(this.grid);
-      $('#exZoom').addEventListener('change', e => { this.zoom = e.target.checked; this.aspect(); });
+      $('#exZoom').addEventListener('change', e => { this.zoom = e.target.checked; this.aspect(); if (this.clip) this.source(); });
       const pb = $('#exPause');
       pb.addEventListener('click', () => { this.paused = !this.paused; pb.textContent = this.paused ? 'Play' : 'Pause'; pb.setAttribute('aria-pressed', String(this.paused)); if (this.paused) this.v.pause(); else play(this.v); });
       watch(this.grid, this);
@@ -1120,9 +1128,18 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
     load(clip) {
       this.clip = clip; this.base = null; this.still = null;
       image(`media/clips/${clip.id}.jpg`, img => { if (this.clip === clip) { this.still = img; this.base = dimmed(img); this.dirty = true; } });
-      this.v.src = `media/clips/${clip.id}.mp4`;
-      if (this.visible && !this.paused) play(this.v);
+      this.source();
       this.aspect();
+    }
+    source() {                                   // zoomed: the clip's zoom grid; else the full grid (same timeline)
+      const url = `media/clips/${this.clip.id}${this.zoom ? '_zoom' : ''}.mp4`;
+      if (this.v.getAttribute('src') !== url) {
+        const t = ready(this.v) ? this.v.currentTime : 0;
+        this.v.src = url;
+        if (t) this.v.addEventListener('loadedmetadata', () => { try { this.v.currentTime = t; } catch (e) { /* not seekable yet */ } }, { once: true });
+      }
+      if (this.visible && !this.paused) play(this.v);
+      this.dirty = true;
     }
     show() { this.visible = true; if (!this.paused) play(this.v); }
     hide() { this.visible = false; this.v.pause(); }
@@ -1132,7 +1149,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
       this.t = t; this.dirty = false;
       if (!this.clip) return;
       if (!this.sized) { this.figs.forEach(f => { f.size = sizeCanvas(f.cv); }); this.sized = true; }
-      const src = { video: this.v, base: this.base, still: this.still, clip: this.clip }, crop = this.crop();
+      const src = { video: this.v, base: this.base, still: this.still, clip: this.clip, zt: this.zoom ? { ...this.clip.zoom, box: this.clip.box } : null }, crop = this.crop();
       for (const f of this.figs) {
         if (!f.size) continue;
         f.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -1147,7 +1164,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
       this.root = root; this.edit = edit; this.k = 'unedited';
       this.cvs = $$('canvas', root).map(cv => ({ cv, ctx: cv.getContext('2d') }));
       const [x0, y0, x1, y1] = edit.box; this.cvs.forEach(c => { c.cv.style.aspectRatio = `${x1 - x0} / ${y1 - y0}`; });
-      this.v = mkVideo(root); this.v.src = 'media/edit.mp4';
+      this.v = mkVideo(root); this.v.src = 'media/edit_zoom.mp4'; this.zt = { ...edit.zoom, box: edit.box };
       image('media/edit.jpg', img => { this.base = dimmed(img); this.still = img; this.dirty = true; });
       new ResizeObserver(() => { this.cvs.forEach(c => { c.size = sizeCanvas(c.cv); }); this.dirty = true; }).observe(root);
       const knob = $('#knob'), lbl = $$('#knobLbl span'), names = ['frozen', 'unedited', 'doubled'], txt = ['frozen', 'as simulated', 'doubled'];
@@ -1170,7 +1187,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
       const clip = { tr: e.tracks[this.k], n: e.n, T: e.T };
       a.ctx.setTransform(1, 0, 0, 1, 0, 0); b.ctx.setTransform(1, 0, 0, 1, 0, 0);
       drawPanel(a.ctx, { base: this.base, clip }, 'points', e.box, [0, 0, a.cv.width, a.cv.height], t);
-      drawPanel(b.ctx, { video: this.v, still: this.still }, tile, e.box, [0, 0, b.cv.width, b.cv.height], t);
+      drawPanel(b.ctx, { video: this.v, still: this.still, zt: this.zt }, tile, e.box, [0, 0, b.cv.width, b.cv.height], t);
     }
   }
 
@@ -1423,7 +1440,7 @@ input[type="range"]::-moz-range-thumb { width: 16px; height: 16px; border-radius
       for (let k = 0; k < 4; k++) {
         const r = A[k].map((v, j) => lerp(v, B[k][j], this.lay));
         const tx = (k % 2) * W0, ty = Math.floor(k / 2) * H0;
-        if (ready(this.v)) ctx.drawImage(this.v, tx, ty, W0, H0, r[0], r[1], r[2], r[3]);
+        if (ready(this.v)) { const s = this.v.videoWidth / (2 * W0); ctx.drawImage(this.v, tx * s, ty * s, W0 * s, H0 * s, r[0], r[1], r[2], r[3]); }
         const dim = (k === 3 && this.lay < .5) ? .62 * (1 - this.lay * 2) : (k < 3 ? .35 * this.lay : 0);
         if (dim > 0) { ctx.fillStyle = `rgba(5,6,7,${dim})`; ctx.fillRect(r[0], r[1], r[2], r[3]); }
         ctx.lineWidth = Math.max(1.5, W * .002);
